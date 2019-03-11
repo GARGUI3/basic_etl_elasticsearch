@@ -1,0 +1,84 @@
+// Crear template
+PUT _template/tweet_template
+{
+    "order": 0,
+    "index_patterns": "tweet_*",
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+        "analysis": {
+            "filter": {
+                "autocomplete_filter": {
+                    "type": "edge_ngram",
+                    "min_gram": "1",
+                    "max_gram": "40"
+                }
+            },
+            "normalizer": {
+                "lowercase_normalizer": {
+                    "filter": [
+                        "lowercase"
+                    ],
+                    "type": "custom"
+                }
+            },
+            "analyzer": {
+                "autocomplete": {
+                    "filter": [
+                        "lowercase",
+                        "autocomplete_filter"
+                    ],
+                    "type": "custom",
+                    "tokenizer": "standard"
+                }
+            }
+        }
+    },
+    "aliases": {
+        "tweets_search": {}
+    },
+    "mappings": {
+        "tweet": {
+            "properties": {
+                "rule_id": {
+                    "type": "keyword"
+                },
+                "body": {
+                    "type": "text",
+                    "fields": {
+                        "keyword": {
+                            "type": "keyword"
+                        },
+                        "ngram": {
+                            "type": "text",
+                            "analyzer": "autocomplete",
+                            "search_analyzer": "standard"
+                        }
+                    },
+                    "fielddata": true
+                },
+                "retweets_count": {
+                    "type": "integer"
+                },
+                "likes_count": {
+                    "type": "integer"
+                },
+                "engagement_count": {
+                    "type": "integer"
+                },
+                "type": {
+                    "type": "keyword"
+                },
+                "sentiment" : {
+                    "type" : "keyword"
+                },
+                "posted_time": {
+                    "type": "date"
+                }
+            }
+        }
+    }
+}
+
+// Crear indice
+PUT tweet_data
